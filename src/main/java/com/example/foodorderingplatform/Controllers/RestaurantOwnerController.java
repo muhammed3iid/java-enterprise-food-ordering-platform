@@ -54,7 +54,9 @@ public class RestaurantOwnerController {
         List<User> resultList = query.getResultList();
         if (!resultList.isEmpty()) {
             user = resultList.get(0);
-            return new Response("Restaurant owner successfully logged in.", user);
+            if (user.getPassword().equals(password)){
+                return new Response("Restaurant owner successfully logged in.", user);
+            }
         }
         return new Response("Restaurant owner account not found", null);
     }
@@ -96,9 +98,34 @@ public class RestaurantOwnerController {
         return new Response("Restaurant ID is invalid.", null);
     }
 
+    @DELETE
+    @Path("/remove-meal/{restaurantID}/{mealName}")
+    public Response removeMeal(@PathParam("restaurantID") int restaurantID, @PathParam("mealName") String mealName){
+        TypedQuery<Restaurant> query = em.createQuery("SELECT r FROM Restaurant r WHERE r.restaurantID = :restaurantID", Restaurant.class);
+        query.setParameter("restaurantID", restaurantID);
+        List<Restaurant> resultList = query.getResultList();
+        if (!resultList.isEmpty()){
+            restaurant = resultList.get(0);
+            for(Meal meal: restaurant.getListOfMeals()){
+                if (meal.getName().equals(mealName)){
+                    restaurant.getListOfMeals().remove(meal);
+                    em.remove(meal);
+                    em.merge(restaurant);
+                    return new Response("Meal successfully removed.", restaurant);
+                }
+            }
+        }
+        return new Response("Restaurant ID or meal name is invalid.", null);
+    }
+
     @GET
     @Path("/get-restaurant/{id}")
-    public Restaurant getRestaurant(@PathParam("id") int id) {
-        return em.find(Restaurant.class, id);
+    public Response getRestaurant(@PathParam("id") int id) {
+        Restaurant restaurant = em.find(Restaurant.class, id);
+        if (restaurant != null) {
+            return new Response("Restaurant successfully retrieved.", em.find(Restaurant.class, id));
+        }
+        return new Response("Restaurant ID is invalid.", null);
     }
+
 }

@@ -1,23 +1,22 @@
 package com.example.foodorderingplatform.Models;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class Order {
+public class OrderBean {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     int orderID;
     double totalPrice;
     String status; // preparing delivered canceled
-//    @OneToMany(mappedBy = "order")
-//    List<Meal> listOfMeals;
+    @OneToMany(mappedBy = "order", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonManagedReference
+    List<Meal> listOfMeals;
 //    @ManyToOne
 //    @JoinColumn(name = "restaurantID")
 //    @JsonBackReference
@@ -26,6 +25,9 @@ public class Order {
     @JoinColumn(name = "runnerID")
     Runner runner;
 
+    public OrderBean(){
+        listOfMeals = new ArrayList<>();
+    }
     public int getOrderID() {
         return orderID;
     }
@@ -50,13 +52,13 @@ public class Order {
         this.status = status;
     }
 
-//    public List<Meal> getListOfMeals() {
-//        return listOfMeals;
-//    }
-//
-//    public void setListOfMeals(List<Meal> listOfMeals) {
-//        this.listOfMeals = listOfMeals;
-//    }
+    public List<Meal> getListOfMeals() {
+        return listOfMeals;
+    }
+
+    public void setListOfMeals(List<Meal> listOfMeals) {
+        this.listOfMeals = listOfMeals;
+    }
 
 //    public Restaurant getRestaurant() {
 //        return restaurant;

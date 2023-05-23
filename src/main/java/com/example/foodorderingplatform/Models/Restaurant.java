@@ -23,7 +23,7 @@ public class Restaurant {
     List<Meal> listOfMeals;
 //    @OneToMany(mappedBy = "restaurant", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 //    @JsonManagedReference
-//    List<Order> listOfOrders;
+//    List<OrderBean> listOfOrders;
 
     public Restaurant() {
         listOfMeals = new ArrayList<>();
@@ -61,11 +61,11 @@ public class Restaurant {
         this.listOfMeals = listOfMeals;
     }
 
-//    public List<Order> getListOfOrders() {
+//    public List<OrderBean> getListOfOrders() {
 //        return listOfOrders;
 //    }
 //
-//    public void setListOfOrders(List<Order> listOfOrders) {
+//    public void setListOfOrders(List<OrderBean> listOfOrders) {
 //        this.listOfOrders = listOfOrders;
 //    }
 }

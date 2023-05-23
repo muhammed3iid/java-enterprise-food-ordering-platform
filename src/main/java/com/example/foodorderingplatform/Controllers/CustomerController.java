@@ -18,7 +18,7 @@ import java.util.List;
 public class CustomerController {
 
     User user;
-    Order order;
+    OrderBean orderObj;
     @PersistenceContext
     private EntityManager em;
 
@@ -58,54 +58,55 @@ public class CustomerController {
 
     @POST
     @Path("/create-order/{username}/{restaurantName}")
-    public Response createMenu(@PathParam("username") String username, @PathParam("restaurantName") String restaurantName){
+    public Response createOrder(@PathParam("username") String username, @PathParam("restaurantName") String restaurantName){
         TypedQuery<User> query = em.createQuery("SELECT u FROM User u WHERE u.role = :role AND u.username =:username", User.class);
         query.setParameter("username", username);
         query.setParameter("role", UserRole.CUSTOMER);
         List<User> resultList = query.getResultList();
         if (!resultList.isEmpty()) {
-            order = new Order();
-            Runner runner = em.find(Runner.class, id);
-            em.persist(order);
-            return new Response("Customer order successfully created.", user);
+            orderObj = new OrderBean();
+            TypedQuery<Runner> q = em.createQuery("SELECT r FROM Runner r WHERE r.status = :status", Runner.class);
+            q.setParameter("status", true);
+            List<Runner> reslist = q.getResultList();
+            if(!reslist.isEmpty()){
+                Runner runner = reslist.get(0);
+                orderObj.setRunner(runner);
+                orderObj.setTotalPrice(0.0 + runner.getDeliveryFees());
+                orderObj.setStatus("Preparing");
+                runner.setStatus(false);
+                em.merge(runner);
+                em.persist(orderObj);
+                return new Response("Customer order successfully created.", orderObj);
+            }
         }
         return new Response("Customer username is invalid.", null);
     }
-//
-//    @POST
-//    @Path("/add-meal/{orderID}/{mealName}")
-//    public Response addMeal(@PathParam("orderID") int orderID, @PathParam("mealName") String mealName){
-//        TypedQuery<Order> query = em.createQuery("SELECT o FROM Order o WHERE o.orderID = :orderID", Order.class);
-//        query.setParameter("orderID", orderID);
-//        List<Order> resultList = query.getResultList();
-//        if (!resultList.isEmpty()){
-//            order = resultList.get(0);
-//            Meal meal = em.find(Meal.class, mealName);
-//            order.getListOfMeals().add(meal);
-//            order.setTotalPrice(order.getTotalPrice() + meal.getPrice());
-//            em.merge(order);
-//            return Response.ok().entity("Order item created successfully.").build();
-//        }
-//        return Response.ok().entity("Invalid restaurant owner id.").build();
-//    }
-//
-//    @GET
-//    @Path("/getorders")
-//    public List<Order> getorders() {
-//        TypedQuery<Order> o = em.createQuery("SELECT o FROM Order o", Order.class);
-//        return o.getResultList();
-//    }
-//
-//    @GET
-//    @Path("/getusers")
-//    public List<User> getusers() {
-//        TypedQuery<User> u = em.createQuery("SELECT p FROM User p", User.class);
-//        List<User> users = u.getResultList();
-//        return users;
-//    }
-//
+
+    @POST
+    @Path("/add-meal/{orderID}/{mealName}")
+    public Response addMeal(@PathParam("orderID") int orderID, @PathParam("mealName") String mealName){
+        TypedQuery<OrderBean> query = em.createQuery("SELECT o FROM OrderBean o WHERE o.orderID = :orderID", OrderBean.class);
+        query.setParameter("orderID", orderID);
+        List<OrderBean> resultList = query.getResultList();
+        if (!resultList.isEmpty()){
+            orderObj = resultList.get(0);
+            TypedQuery<Meal> q = em.createQuery("SELECT m FROM Meal m WHERE m.name = :mealName", Meal.class);
+            q.setParameter("mealName", mealName);
+            List<Meal> reslist = q.getResultList();
+            if(!reslist.isEmpty()){
+                Meal meal = reslist.get(0);
+                orderObj.setStatus("Preparing");
+                orderObj.getListOfMeals().add(meal);
+                orderObj.setTotalPrice(orderObj.getTotalPrice() + meal.getPrice());
+                em.merge(orderObj);
+                return new Response("Customer meal successfully added to order.", orderObj);
+            }
+        }
+        return new Response("Order ID or meal name is invalid.", null);
+    }
+
     @GET
-    @Path("/getrestaurants")
+    @Path("/get-restaurants")
     public List<Restaurant> getrestaurants() {
         TypedQuery<Restaurant> r = em.createQuery("SELECT r FROM Restaurant r", Restaurant.class);
         return r.getResultList();

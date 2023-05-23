@@ -16,9 +16,10 @@ public class Meal {
     @JoinColumn(name = "restaurantID")
     @JsonBackReference
     Restaurant restaurant;
-//    @ManyToOne
-//    @JoinColumn(name = "orderID")
-//    Order order;
+    @ManyToOne
+    @JoinColumn(name = "orderID")
+    @JsonBackReference
+    OrderBean order;
 
     public int getMealID() {
         return mealID;
@@ -52,11 +53,11 @@ public class Meal {
         this.restaurant = restaurant;
     }
 
-//    public Order getOrder() {
+//    public OrderBean getOrder() {
 //        return order;
 //    }
 //
-//    public void setOrder(Order order) {
+//    public void setOrder(OrderBean order) {
 //        this.order = order;
 //    }
 }

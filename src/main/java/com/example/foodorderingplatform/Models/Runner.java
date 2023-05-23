@@ -1,9 +1,5 @@
 package com.example.foodorderingplatform.Models;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
 import javax.persistence.*;
 import java.util.List;
 
@@ -18,7 +14,7 @@ public class Runner {
     boolean status; // available busy
     double deliveryFees;
     @OneToMany(mappedBy = "runner")
-    List<Order> listOfOrders;
+    List<OrderBean> listOfOrders;
 
     public int getRunnerID() {
         return runnerID;
